@@ -1,0 +1,110 @@
+initArgs: &init-args
+  ipkStr: "B/tlxrRZJ1OPyCDtpGqAlsYUEeAyiQqa68tP3tbX6Q4="
+  spkStr: "z7MTq7y/iuK4jptA+TLUM6cNedjp/RdN/AlA3FEatR0="
+  rootStr: "KmOP/BKB29JlSTUqo5qzmEQcc7BT5q0rWGlvbg/3Tyk="
+  gvkStr: "o+BvDNdto8DBR0ztdp9vj7vH52XawyzaxgTlgf0PKJKmyjV32XLw2u30TP8M3VQaVp93BVi1B5nKgZJpHY1ROue5bRLUeiv5BQIrj9UFGd4uM1zCaOfTgE3lIoxKjD87Hyf9CKkc7LcAs5Kw+uzDJ01w0PoqecCpN1JNudDyr/LW2A99hI8gDBLVCMLjBpwqLdj2rj6xNczkXU/+kXThACIs3aiBDElbAxIQpzf/I5eJToszX4mXyFoHx8BCNsejsEQscJViDB0eiwfaDcRvpurd6cJvQ6gYvGJ1xFtDzqXuesXU8OoHK1DD+C/fFbvycKCahCnayhwVqtJmrI+lAwR7Irskk7JfSwdEiVWh7joj2DCmJNulBdFtbv3DkafSAAAAEK9Ai9S2tVQVLiqjN2ODxoIY5cDVhMg7pB3UkxZb8UQ2xKTfZ4KWPcxWUXXlZ83WaJAzmMAktLDUiKlxTYhEDr6Th1GwWVY3udrEj3nqBZhXk5rxET3waE7XNHOyXClnuKU81S0eZqgoh9rTBk23fDsuGFZ2ui7ylT637ZPES++Tx3G2PslA7Xo4L4AXLeObES64k1O5FyhKl5u+oFsrIDWSzrNTJ19M8vOLyP1F82SRDttMuR9hns+rMOrZ1zDAA8XOC9OdjOznRo/yaXx2Ki7d/weLDympDGJBlhfq2I7exnflzybtOQMhorsT2wTOU80O7gKQ2PzKCaqp7S4gSzmhkEDubmS1kFF4kTCK/4QvZ2zJEkkKq9TDLFk+5AJSAZflMsUls9cBZcvLoDoY7O5wnS5aiqvCUpFkETpo25Zz2f+SKWnR4WPNPBiruN3PAe5FCP5FQFCx5krxw0soLDetC0EVz4CDNL2oKGti0iQB2yCpzxNugkFKDFuAbZruX4rvQckQNLgvQm+cBGRR6TKT7uz+YFuPFoH32UaYKETaz0pDzX1LTpHGu21FxNmQ8hAawLGuNCaYTwx/qVyWZQfX9NMFYJGVqO2LvvZG4ytZYnaaCa+TjVxCswEsfu2FAsss3aBwCeF934pb7zWu4Je17mAVwX+2dFoxb9BoVYGgAAAAAQAAAAAAAAAB6yZuJxWikuKpCukHEH6wy+BpVscFvO8CFcfGkIUX4W4WLsu2SXOuzIgz7E4SI/hkUU5fEo83jm8fAnF/vwCQVsbrIm3R4huC9uG0TVpwyV1jPJgYaFXPVdeGHJyPTCX6AgAWLfq7DhBCx0B2KZpQz2hHbN1c7nHDuyNA1JoMQrM="
+
+test:
+  name: s3crosszk
+  description: Caliper test for zkSNARKs-based pseudonym system
+  workers:
+    number: 8
+  rounds:
+    - label: init-ledger
+      description: Initialize public parameters
+      txNumber: 1
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 1
+      workload:
+        module: benchmarks/scenario/s3crosszk/initLedger.js
+        arguments: *init-args
+
+    - label: create-pseudonym-50
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: benchmarks/scenario/s3crosszk/createPseudonym.js
+
+    - label: create-pseudonym-100
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 100
+      workload:
+        module: benchmarks/scenario/s3crosszk/createPseudonym.js
+
+    - label: create-pseudonym-200
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 200
+      workload:
+        module: benchmarks/scenario/s3crosszk/createPseudonym.js
+
+    - label: create-pseudonym-300
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 300
+      workload:
+        module: benchmarks/scenario/s3crosszk/createPseudonym.js
+
+    - label: create-pseudonym-400
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 400
+      workload:
+        module: benchmarks/scenario/s3crosszk/createPseudonym.js
+
+    - label: create-pseudonym-500
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 500
+      workload:
+        module: benchmarks/scenario/s3crosszk/createPseudonym.js
+
+    - label: create-pseudonym-600
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 600
+      workload:
+        module: benchmarks/scenario/s3crosszk/createPseudonym.js
+
+    - label: query-by-pbk-2000
+      txNumber: 20000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 2000
+      workload:
+        module: benchmarks/scenario/s3crosszk/queryByPBKStr.js
+
+    - label: query-by-pbk-4000
+      txNumber: 20000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 4000
+      workload:
+        module: benchmarks/scenario/s3crosszk/queryByPBKStr.js
+
+monitors:
+    resource:
+    - module: docker
+      options:
+        interval: 1
+        containers: ['all']

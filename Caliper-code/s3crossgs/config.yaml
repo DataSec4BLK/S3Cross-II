@@ -1,0 +1,109 @@
+initArgs: &init-args
+  ppStr: "ewogICJHIjogImdBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUU9IiwKICAiSCI6ICJ5SkRmVGNPU0IzdVN0SUFhdCtLVDVvWFJpU2ErUk9pUGJhMm1JSEtjdUZRPSIsCiAgIm1vZCI6ICJNR1JPY3VFeG9DbTRVRVcyZ1lGWVhTZ3o2RWg1dVhDUlErSDFrL0FBQUFFPSIKfQ=="
+  gpStr: "ewogICJnYW1tYSI6IG51bGwsCiAgIlNrIjogbnVsbCwKICAiZzEiOiAiZ0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBRT0iLAogICJnMiI6ICJtWTZUazVJTlNEcHlZTCszTWZ0ZEpmR3FTVE0xcWVjU2wrU0Z0Njd6RXNJWUFON3ZFaDhlZGtKcUFHWmVYRVI1WjBNaTFQZGUydDFHM3IxYzJaTDI3UT09IiwKICAicGsiOiAiMDAzRXdLbWtFRSs1MW5mOU9LTU1UL3o0Nk1rU2VUaDlnbE8yVXcydnE2bz0iLAogICJ3IjogIjZpU2ROV1NCelE4VXhPb1BLb1VPZDgrRWtxOEVvN2s2NWI2cFEzNU0vcUlYZnN5NVhzYVBTREVFY1FkSjVGditybTFDQjFCRWk1L3l2RitJU0JUYXVnPT0iLAogICJoIjogIno1OG1vZ0xodTBQOG5ya2tXZFViRXN2YW0rUjhHbU1KLzZGM3cxTVFiRjA9IiwKICAiaDAiOiAiNVlOQ2xoWUJITUN0WG50RzFZTDl2WDNBTHBkYjlaWlVrSEpsZDZ0ZG5LTT0iCn0="
+
+test:
+  name: s3crossgs
+  description: Caliper test for group-signature-based pseudonym system
+  workers:
+    type: local
+    number: 8
+  rounds:
+    - label: init-ledger
+      description: Initialize public parameters
+      txNumber: 1
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 1
+      workload:
+        module: benchmarks/scenario/s3crossgs/initLedger.js
+        arguments: *init-args
+
+    - label: create-pseudonym-50
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: benchmarks/scenario/s3crossgs/createPseudonym.js
+
+    - label: create-pseudonym-100
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 100
+      workload:
+        module: benchmarks/scenario/s3crossgs/createPseudonym.js
+
+    - label: create-pseudonym-200
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 200
+      workload:
+        module: benchmarks/scenario/s3crossgs/createPseudonym.js
+
+    - label: create-pseudonym-300
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 300
+      workload:
+        module: benchmarks/scenario/s3crossgs/createPseudonym.js
+
+    - label: create-pseudonym-400
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 400
+      workload:
+        module: benchmarks/scenario/s3crossgs/createPseudonym.js
+
+    - label: create-pseudonym-500
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 500
+      workload:
+        module: benchmarks/scenario/s3crossgs/createPseudonym.js
+
+    - label: create-pseudonym-600
+      txNumber: 4000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 600
+      workload:
+        module: benchmarks/scenario/s3crossgs/createPseudonym.js
+
+    - label: query-by-pbk-2000
+      txNumber: 20000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 2000
+      workload:
+        module: benchmarks/scenario/s3crossgs/queryByPBKStr.js
+
+    - label: query-by-pbk-4000
+      txNumber: 20000
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 4000
+      workload:
+        module: benchmarks/scenario/s3crossgs/queryByPBKStr.js
+
+monitors:
+    resource:
+    - module: docker
+      options:
+        interval: 1
+        containers: ['all']

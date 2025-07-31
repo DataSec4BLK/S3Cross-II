@@ -1,0 +1,63 @@
+命令行配置:
+
+    必备步骤:
+
+    cd ../../test-network
+    export PATH=${PWD}/../bin:$PATH
+    export FABRIC_CFG_PATH=$PWD/../config/
+
+    Org1:
+        export CORE_PEER_TLS_ENABLED=true
+        export CORE_PEER_LOCALMSPID="Org1MSP"
+        export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+        export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+        export CORE_PEER_ADDRESS=localhost:7051
+
+    Org2:
+        export CORE_PEER_LOCALMSPID="Org2MSP"
+        export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+        export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+        export CORE_PEER_ADDRESS=localhost:9051
+
+    创建 channel:
+        ./network.sh createChannel -c mychannel
+
+链码：
+
+    代码打包:
+        peer lifecycle chaincode package s3crosszk.tar.gz --path /Users/chenchang/Desktop/BJTU/论文投稿/TNSM/实验代码/BlockchainCode/s3cross-zksnarks/chaincode-go --lang golang --label s3crosszk_0.1.1
+
+    安装:
+        peer lifecycle chaincode install s3crosszk.tar.gz
+
+注意：--sequence 需要随合约的部署次数递增
+
+    Approve:
+        1. peer lifecycle chaincode queryinstalled
+        2. export CC_PACKAGE_ID=s3crosszk:e10aa923e9976e87b70e52e0d0458805549ed31bc10a7d325656e7e00066763d
+        3. peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID mychannel --name s3crosszk --version 1.0 --package-id $CC_PACKAGE_ID --sequence 1 --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
+
+    Commit:
+        1. peer lifecycle chaincode checkcommitreadiness --channelID mychannel --name s3crosszk --version 1.0 --sequence 1 --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" --output json
+        2. peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID mychannel --name s3crosszk --version 1.0 --sequence 1 --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" --peerAddresses localhost:9051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt"
+
+        3. peer lifecycle chaincode querycommitted --channelID mychannel --name s3crosszk --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
+
+    调用:
+    InitLedger:
+        peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" -C mychannel -n s3crosszk --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" --peerAddresses localhost:9051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt" -c '{"function":"InitLedger","Args":["57db16be194b3619334f40648edcb9fc6639f7d7ed4fc64e946e34d063354aac", "ebce1ff751e1d520021fafc0a268c61ad0fe00133f17bed5a6a2c78a82451e0f", "2a638ffc1281dbd26549352aa39ab398441c73b053e6ad2b58696f6e0ff74f29", "e38078ab78d1fd6b2e7a8ef147143f6753631b85c17a2b7f8409270c9d39c2fcaac300077344523c35d7dc390cc8ca1530ddadba2b5a19413f4ac934fbc5a686a779775dd6a0e5e4bdf63d8470ca2d39e2b1153368163df9fb9398bdad0a8c48251b93185b0ad52328193eb76532e5e3e0e97c60fc9bce314665bfd5b754635f818b2d29895aab71fac03e61d5bb509cd80f9ba9c2aec440448e33a0386de1a60593092175d9ff46eba9e416b5ccdd00d55df277f0c7e33f1f86ecacbc637124ad1824170ba0c501eb1faa45af1c147207f0f1d70a35ad704d8cb46337b954bc9eb3afe6553d8b94f1f53458ee3b083f40914d75b7baaec53db9fd9438961b4a226d28a41189806b6e0fd77d2811678473151c54a9bbc59d725655887573d80100000010d4daab6321a501776a4d8b60afaaf84df7b7fc205ddb7ff174dcfbd3604de953e81ad1b99f502291955339c04c15a859b622f347aee4ea4d42ae3269b39575ddad1f6129eb216811a1834ad84323a1a41a7d2a4b66d1aa1c32c1e2e6e5e1c0c0ded66ba58f6174fe0a2ba49363e4fa21e3ff7ab956452ff0d4ca4a7b7b666930cc8d2ed189b2e4fd7d77cfbc2f58bdb07525b3f03f303136a48a820d350c51ff8885a8ef88df305088777f7dc135caaa7e5ef85f2a0ec795c0c3f48644214893868338f25b4663a7e939a322b37599cbd6844147fdee43305862f5884b373cbee3df633fdfd2c4584bba1cac6eefabae802b401e3043354506a63416688f703aa579527c5139207796121f967918b928746bba89b439ade96c094586be95f868e396554cddda46e5a667ec28f7bea79327e35c51aba8b027f6b7aa62539174db9956fe3d2ee8fac975b5149d2117b4a449826ba29adeaee9d1c82441433422c4ecc38e86a05e52755d6b61f75ab868afce96683e794ba6785d8e57330c1294b1974c55ccd09901c501d5f9bc90f62bc209f0d2bdd8b8d0ac343f9678dc48c489a8f850eb8362b229b82ec80e67745c08a7cb7ffdb84f7cf8b36bd787e71433189b9b4c3e1740e2ab3655fb8d69bf2050944fb97210e263bfd9d34a13da85b565e096ed0e4ca97c170b9f89f7987578b6034a4b0c15cf56568f787e9ca847f63c0000000100000000000000019bfa7469f1c6973950ec83b7f20ee034ec7fba36703cf39d8fd01506775f8b742b043c5563dbd078ebc60adb7594c9f10ca70a35d743ec7eeafc3d29e138ea14c3ad18b0ba73b60bc60277b02cfc05d626e7e7c502d899aefee5d6f87d47e4fe232db1ab3741add7815f9debacfffc1ac2242f17065f75d063f99c6d6713976b"]}'
+
+    UpdateGVK:
+        peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" -C mychannel -n s3crosszk --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" --peerAddresses localhost:9051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt" -c '{"function":"UpdateGVK","Args":[""]}'
+
+    CreatePseudonym:
+        peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" -C mychannel -n s3crosszk --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" --peerAddresses localhost:9051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt" -c '{"function":"CreatePseudonym","Args":["", ""]}'
+
+    GetAllPseudonymsPaged:
+        peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" -C mychannel -n s3crosszk --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" --peerAddresses localhost:9051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt" -c '{"function":"GetAllPseudonymsPaged","Args":["10", ""]}'
+
+    QueryPseudonymByPBK:
+        peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" -C mychannel -n s3crosszk --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" --peerAddresses localhost:9051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt" -c '{"function":"QueryPseudonymByPBK","Args":["9f4d0a3d73d736a408eeb86078f58c1dd75a85b004353e9af4fa2a688d2f5127"]}'
+
+    IsPseudonymValid:
+        peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" -C mychannel -n s3crosszk --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" --peerAddresses localhost:9051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt" -c '{"function":"IsPseudonymValid","Args":["9f4d0a3d73d736a408eeb86078f58c1dd75a85b004353e9af4fa2a688d2f5127"]}'
